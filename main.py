@@ -1,17 +1,61 @@
+import streamlit as st 
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings 
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain.prompts import PromptTemplate  
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda
+from langchain_core.output_parsers import StrOutputParser
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, VideoUnavailable
-import streamlit as st
-from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv
 
-st.write("### Youtube Video RAG")
+load_dotenv()
+
+# Create a prompt template for the AI assistant
+prompt=PromptTemplate(
+    template="""
+    You are a helpful assistant that answers questions based strictly on the provided YouTube video transcript context. Use the transcript chunks to generate answers that are accurate and relevant to what was said in the video. You may lightly polish the language for clarity and flow, but do not add any facts that are not present in the transcript.
+
+    If the user's question is **not covered** or **not clearly addressed** in the transcript, politely respond that the transcript does not contain enough information to answer their question accurately.
+
+    Transcript Context:
+    {context}
+
+    User Question:
+    {question}
+
+    Instructions:
+    - If the answer is clearly in the context, explain it clearly, concisely, and in a user-friendly tone.
+    - If the transcript offers partial information, explain only what is known, and indicate what’s missing.
+    - If the question goes beyond the transcript, say:  
+     “The transcript does not contain information to answer that accurately. Please provide more context or refer to another source.”
+    """  ,
+    input_variables=['context','question']  # Variables to be inserted into the prompt
+)
+
+# Initialize the Google Generative AI chat model
+model=ChatGoogleGenerativeAI(
+    model="gemini-2.5-pro",  # Using Gemini Pro model for chat responses
+    temperature=0.7
+)
+
+# Initialize embeddings model for converting text to vector representations
+embedding_model=GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+st.write("### Youtube Video RAG") 
 st.write("➡️ The **video ID** is this part of a YouTube link: `https://www.youtube.com/watch?v=`**`videoid`**")
 
+# Get video ID input from user
 video_id=st.text_input("Paste the Youtube Video ID.")
 
-if video_id:  # Only run if there's actual input
+# Process the video only if user has provided input
+if video_id: 
     try:
+        # Fetch transcript from YouTube using the video ID
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+        
+        # Join all transcript chunks into a single string
         transcript=" ".join(chunk['text'] for chunk in transcript_list)
-        st.write(transcript)
+   
     except TranscriptsDisabled:
         st.write("Transcripts are disabled for this video.")
     except NoTranscriptFound:
@@ -20,3 +64,9 @@ if video_id:  # Only run if there's actual input
         st.write("The video is unavailable.")
     except Exception as e:
         st.write(f"An unexpected error occurred: {e}")
+        
+splitter=RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+
+chunk=splitter.create_documents([transcript])
+
+vector_store=FAISS.from_documents(chunk,embedding_model)
