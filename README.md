@@ -78,7 +78,7 @@ A Streamlit-based application that extracts transcripts from YouTube videos and 
 ## 🔧 Configuration
 
 ### Model Settings
-- **Chat Model**: Gemini 2.5 Pro with temperature 0.7
+- **Chat Model**: Gemini 2.5 Flash with temperature 0.7
 - **Embeddings**: Google Generative AI Embeddings (embedding-001)
 - **Chunk Size**: 1000 characters with 200 character overlap
 
