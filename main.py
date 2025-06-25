@@ -43,7 +43,7 @@ embedding_model=GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 parser=StrOutputParser()
 
-st.title("Youtube Video RAG") 
+st.title("RAGTube") 
 
 # Get video ID input from user
 st.sidebar.write("➡️ The **video ID** is this part of a YouTube link: `https://www.youtube.com/watch?v=`**`videoid`**")
@@ -70,25 +70,6 @@ if video_id:
     except Exception as e:
         st.write(f"An unexpected error occurred: {e}")
         
-# Initialize chat history
-# if "messages" not in st.session_state:
-#     st.session_state.messages = []
-
-# # Display chat messages from history on app rerun
-# for message in st.session_state.messages:
-#     with st.chat_message(message["role"]):
-#         st.markdown(message["content"])
-
-# # Accept user input
-# if prompt := st.chat_input("What is up?"):
-#     # Display user message in chat message container
-#     with st.chat_message("user"):
-#         st.markdown(prompt)
-#     # Add user message to chat history
-#     st.session_state.messages.append({"role": "user", "content": prompt})
-    
-#     with st.chat_message("assistant"):
-#         st.markdown()
 
 # Only process if transcript exists
 if transcript:
@@ -105,8 +86,40 @@ if transcript:
     parallel_chain=RunnableParallel({
         'context':retriever | RunnableLambda(format_docs),
         'question':RunnablePassthrough()
-    })
+     })
 
     main_chain=parallel_chain | prompt | model | parser
     
-    st.write(main_chain.invoke('Is Deepseek a chinese company?'))
+    def generate_response(input):
+        result =main_chain.invoke(input)
+        return result
+      
+     # Store LLM generated responses
+    # Initialize session state
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {"role": "assistant", "content": "Hi! I'm RAGTube, your AI companion for exploring YouTube videos. Ready to chat about any video content you choose!"}
+        ]
+
+    # Display all chat messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+    # User input
+    prompt = st.chat_input("")
+
+    if prompt:
+        # Append user message
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.write(prompt)
+
+        # Generate assistant response
+        with st.chat_message("assistant"):
+            with st.spinner("Getting your answer from mystery stuff..."):
+                response = generate_response(prompt)
+                st.write(response)
+
+        # Append assistant message
+        st.session_state.messages.append({"role": "assistant", "content": response})
