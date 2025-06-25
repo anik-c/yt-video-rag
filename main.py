@@ -34,18 +34,23 @@ prompt=PromptTemplate(
 
 # Initialize the Google Generative AI chat model
 model=ChatGoogleGenerativeAI(
-    model="gemini-2.5-pro",  # Using Gemini Pro model for chat responses
+    model="gemini-2.5-flash",  # Using Gemini Pro model for chat responses
     temperature=0.7
 )
 
 # Initialize embeddings model for converting text to vector representations
 embedding_model=GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-st.write("### Youtube Video RAG") 
-st.write("➡️ The **video ID** is this part of a YouTube link: `https://www.youtube.com/watch?v=`**`videoid`**")
+parser=StrOutputParser()
+
+st.title("Youtube Video RAG") 
 
 # Get video ID input from user
-video_id=st.text_input("Paste the Youtube Video ID.")
+st.sidebar.write("➡️ The **video ID** is this part of a YouTube link: `https://www.youtube.com/watch?v=`**`videoid`**")
+video_id=st.sidebar.text_input("Paste the Youtube Video ID.")
+
+# Initialize transcript variable
+transcript = None
 
 # Process the video only if user has provided input
 if video_id: 
@@ -65,8 +70,43 @@ if video_id:
     except Exception as e:
         st.write(f"An unexpected error occurred: {e}")
         
-splitter=RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+# Initialize chat history
+# if "messages" not in st.session_state:
+#     st.session_state.messages = []
 
-chunk=splitter.create_documents([transcript])
+# # Display chat messages from history on app rerun
+# for message in st.session_state.messages:
+#     with st.chat_message(message["role"]):
+#         st.markdown(message["content"])
 
-vector_store=FAISS.from_documents(chunk,embedding_model)
+# # Accept user input
+# if prompt := st.chat_input("What is up?"):
+#     # Display user message in chat message container
+#     with st.chat_message("user"):
+#         st.markdown(prompt)
+#     # Add user message to chat history
+#     st.session_state.messages.append({"role": "user", "content": prompt})
+    
+#     with st.chat_message("assistant"):
+#         st.markdown()
+
+# Only process if transcript exists
+if transcript:
+    splitter=RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=150)
+    chunks=splitter.create_documents([transcript])
+    vector_store=FAISS.from_documents(chunks,embedding_model)
+
+    retriever=vector_store.as_retriever(search_type="similarity",search_kwargs={"k":2})
+            
+    def format_docs(retrieved_docs):
+        context_text="\n\n".join(doc.page_content for doc in retrieved_docs)
+        return context_text
+
+    parallel_chain=RunnableParallel({
+        'context':retriever | RunnableLambda(format_docs),
+        'question':RunnablePassthrough()
+    })
+
+    main_chain=parallel_chain | prompt | model | parser
+    
+    st.write(main_chain.invoke('Is Deepseek a chinese company?'))
