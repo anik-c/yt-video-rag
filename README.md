@@ -2,7 +2,7 @@
 
 A Streamlit-based application that extracts transcripts from YouTube videos and enables users to ask questions about the video content using Google's Generative AI models.
 
-## 🚀 Features
+## Features
 
 - **YouTube Transcript Extraction**: Automatically fetches transcripts from YouTube videos using video IDs
 - **Smart Text Chunking**: Splits long transcripts into manageable chunks for better processing
@@ -10,7 +10,7 @@ A Streamlit-based application that extracts transcripts from YouTube videos and 
 - **AI-Powered Q&A**: Leverages Google's Gemini AI model to answer questions based on video content
 - **User-Friendly Interface**: Clean Streamlit web interface for easy interaction
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **Streamlit**: Web application framework
 - **LangChain**: Framework for building applications with large language models
@@ -19,13 +19,13 @@ A Streamlit-based application that extracts transcripts from YouTube videos and 
 - **YouTube Transcript API**: For extracting video transcripts
 - **Python-dotenv**: Environment variable management
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Python 3.8 or higher
 - Google API key for Generative AI
 - Internet connection for YouTube transcript fetching
 
-## ⚙️ Installation
+##  Installation
 
 1. **Clone the repository**:
    ```bash
@@ -49,7 +49,7 @@ A Streamlit-based application that extracts transcripts from YouTube videos and 
    GOOGLE_API_KEY=your_google_api_key_here
    ```
 
-## 🎯 Usage
+## Usage
 
 1. **Run the application**:
    ```bash
@@ -65,7 +65,7 @@ A Streamlit-based application that extracts transcripts from YouTube videos and 
    - Ask questions about the video content
    - Get AI-powered answers based on the transcript
 
-## 📖 How It Works
+## How It Works
 
 1. **Transcript Extraction**: The app uses the YouTube Transcript API to fetch transcripts for the provided video ID
 2. **Text Processing**: The transcript is split into chunks using RecursiveCharacterTextSplitter for optimal processing
@@ -75,7 +75,7 @@ A Streamlit-based application that extracts transcripts from YouTube videos and 
    - Provides context to the Gemini AI model
    - Generates accurate answers based strictly on the video content
 
-## 🔧 Configuration
+## Configuration
 
 ### Model Settings
 - **Chat Model**: Gemini 2.5 Flash with temperature 0.7
@@ -89,7 +89,7 @@ The application handles various scenarios:
 - Video unavailable
 - General API errors
 
-## 📝 Example Usage
+## Example Usage
 
 1. Find a YouTube video URL: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
 2. Extract the video ID: `dQw4w9WgXcQ`
@@ -99,14 +99,14 @@ The application handles various scenarios:
    - "Can you summarize the key points?"
    - "What does the speaker say about [specific topic]?"
 
-## ⚠️ Limitations
+##  Limitations
 
 - Only works with videos that have English transcripts available
 - Answers are limited to content present in the video transcript
 - Some videos may have transcripts disabled by the creator
 - API rate limits may apply based on your Google API usage
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -114,18 +114,18 @@ The application handles various scenarios:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [LangChain](https://langchain.com/) for the RAG framework
 - [Streamlit](https://streamlit.io/) for the web interface
 - [Google AI](https://ai.google/) for the generative AI capabilities
 - [YouTube Transcript API](https://github.com/jdepoix/youtube-transcript-api) for transcript extraction
 
-## 📞 Support
+## Support
 
 If you encounter any issues or have questions, please open an issue on the GitHub repository.
 
